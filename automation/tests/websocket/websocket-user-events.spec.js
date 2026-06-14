@@ -13,13 +13,16 @@ test.describe('User Management WebSocket Events', () => {
                     'ws://localhost:3001'
                 );
 
-                ws.on('message', (data) => {
+                ws.on('open', () => {
 
-                    resolve(
-                        JSON.parse(data.toString())
-                    );
+                    ws.on('message', (data) => {
 
-                    ws.close();
+                        resolve(
+                            JSON.parse(data.toString())
+                        );
+
+                        ws.close();
+                    });
                 });
             });
 
@@ -61,13 +64,16 @@ test.describe('User Management WebSocket Events', () => {
                     'ws://localhost:3001'
                 );
 
-                ws.on('message', (data) => {
+                ws.on('open', () => {
 
-                    resolve(
-                        JSON.parse(data.toString())
-                    );
+                    ws.on('message', (data) => {
 
-                    ws.close();
+                        resolve(
+                            JSON.parse(data.toString())
+                        );
+
+                        ws.close();
+                    });
                 });
             });
 
@@ -80,6 +86,8 @@ test.describe('User Management WebSocket Events', () => {
                     }
                 }
             );
+
+            expect(response.status()).toBe(201);
 
             const responseBody = await response.json();
 
@@ -106,6 +114,11 @@ test.describe('User Management WebSocket Events', () => {
                 'ws://localhost:3001'
             );
 
+            await new Promise((resolve) => {
+
+                ws.on('open', resolve);
+            });
+
             ws.on('message', (data) => {
 
                 events.push(
@@ -113,14 +126,12 @@ test.describe('User Management WebSocket Events', () => {
                 );
             });
 
-            await new Promise((r) => setTimeout(r, 500));
-
             await request.post(
                 'http://localhost:3000/api/users',
                 {
                     data: {
-                        name: 'User One',
-                        email: 'user1@test.com'
+                        name: 'Event User One',
+                        email: 'event1@test.com'
                     }
                 }
             );
@@ -129,8 +140,8 @@ test.describe('User Management WebSocket Events', () => {
                 'http://localhost:3000/api/users',
                 {
                     data: {
-                        name: 'User Two',
-                        email: 'user2@test.com'
+                        name: 'Event User Two',
+                        email: 'event2@test.com'
                     }
                 }
             );
@@ -154,39 +165,50 @@ test.describe('User Management WebSocket Events', () => {
         'All connected clients should receive identical USER_CREATED events',
         async ({ request }) => {
 
+            const createClient = () => {
+
+                return new Promise((resolve) => {
+
+                    const ws = new WebSocket(
+                        'ws://localhost:3001'
+                    );
+
+                    ws.on('open', () => {
+
+                        resolve(ws);
+                    });
+                });
+            };
+
+            const client1 = await createClient();
+
+            const client2 = await createClient();
+
             const client1Promise = new Promise((resolve) => {
 
-                const ws = new WebSocket(
-                    'ws://localhost:3001'
-                );
-
-                ws.on('message', (data) => {
+                client1.on('message', (data) => {
 
                     resolve(
                         JSON.parse(data.toString())
                     );
 
-                    ws.close();
+                    client1.close();
                 });
             });
 
             const client2Promise = new Promise((resolve) => {
 
-                const ws = new WebSocket(
-                    'ws://localhost:3001'
-                );
-
-                ws.on('message', (data) => {
+                client2.on('message', (data) => {
 
                     resolve(
                         JSON.parse(data.toString())
                     );
 
-                    ws.close();
+                    client2.close();
                 });
             });
 
-            await request.post(
+            const response = await request.post(
                 'http://localhost:3000/api/users',
                 {
                     data: {
@@ -195,6 +217,8 @@ test.describe('User Management WebSocket Events', () => {
                     }
                 }
             );
+
+            expect(response.status()).toBe(201);
 
             const client1Event =
                 await client1Promise;

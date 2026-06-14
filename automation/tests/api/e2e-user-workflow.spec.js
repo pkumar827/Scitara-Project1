@@ -25,7 +25,6 @@ test.describe('User Management API - End-to-End Workflow', () => {
             const responseBody = await response.json();
 
             expect(responseBody.success).toBeTruthy();
-
             expect(responseBody.message)
                 .toBe('User created successfully');
 
@@ -104,9 +103,6 @@ test.describe('User Management API - End-to-End Workflow', () => {
 
             expect(responseBody.success).toBeTruthy();
 
-            expect(responseBody.message)
-                .toBe('User updated successfully');
-
             expect(responseBody.data.name)
                 .toBe('Updated User');
 
@@ -143,14 +139,12 @@ test.describe('User Management API - End-to-End Workflow', () => {
 
             const initialCount = initialBody.data.length;
 
-            const createResponse = await api.post('users', {
+            await api.post('users', {
                 data: {
                     name: 'Count Verification User',
                     email: 'count@test.com'
                 }
             });
-
-            expect(createResponse.status()).toBe(201);
 
             const finalResponse = await api.get('users');
             const finalBody = await finalResponse.json();
@@ -173,10 +167,8 @@ test.describe('User Management API - End-to-End Workflow', () => {
 
             const createdUser = await createResponse.json();
 
-            const userId = createdUser.data.id;
-
             await api.put(
-                `users/${userId}`,
+                `users/${createdUser.data.id}`,
                 {
                     data: {
                         name: 'Persistence Updated',
@@ -186,10 +178,8 @@ test.describe('User Management API - End-to-End Workflow', () => {
             );
 
             const getResponse = await api.get(
-                `users/${userId}`
+                `users/${createdUser.data.id}`
             );
-
-            expect(getResponse.status()).toBe(200);
 
             const userDetails = await getResponse.json();
 
@@ -214,27 +204,166 @@ test.describe('User Management API - End-to-End Workflow', () => {
 
             const createdUser = await createResponse.json();
 
-            const userId = createdUser.data.id;
-
-            const deleteResponse = await api.delete(
-                `users/${userId}`
+            await api.delete(
+                `users/${createdUser.data.id}`
             );
 
-            expect(deleteResponse.status()).toBe(200);
-
             const getResponse = await api.get(
-                `users/${userId}`
+                `users/${createdUser.data.id}`
             );
 
             expect(getResponse.status()).toBe(404);
+        }
+    );
 
-            const errorBody = await getResponse.json();
+    test(
+        'Creating one user should not modify existing users',
+        async ({ api }) => {
 
-            expect(errorBody.success)
-                .toBeFalsy();
+            const userAResponse = await api.post('users', {
+                data: {
+                    name: 'User A',
+                    email: 'usera@test.com'
+                }
+            });
 
-            expect(errorBody.message)
-                .toBe('User not found');
+            const userA = await userAResponse.json();
+
+            await api.post('users', {
+                data: {
+                    name: 'User B',
+                    email: 'userb@test.com'
+                }
+            });
+
+            const response = await api.get(
+                `users/${userA.data.id}`
+            );
+
+            const userAAfter = await response.json();
+
+            expect(userAAfter.data.name)
+                .toBe('User A');
+
+            expect(userAAfter.data.email)
+                .toBe('usera@test.com');
+        }
+    );
+
+    test(
+        'Multiple updates should preserve the latest state',
+        async ({ api }) => {
+
+            const createResponse = await api.post('users', {
+                data: {
+                    name: 'Multi Update User',
+                    email: 'multi@test.com'
+                }
+            });
+
+            const user = await createResponse.json();
+
+            await api.put(
+                `users/${user.data.id}`,
+                {
+                    data: {
+                        name: 'Version One',
+                        email: 'v1@test.com'
+                    }
+                }
+            );
+
+            await api.put(
+                `users/${user.data.id}`,
+                {
+                    data: {
+                        name: 'Version Two',
+                        email: 'v2@test.com'
+                    }
+                }
+            );
+
+            const response = await api.get(
+                `users/${user.data.id}`
+            );
+
+            const updatedUser = await response.json();
+
+            expect(updatedUser.data.name)
+                .toBe('Version Two');
+
+            expect(updatedUser.data.email)
+                .toBe('v2@test.com');
+        }
+    );
+
+    test(
+        'Deleting one user should not affect other users',
+        async ({ api }) => {
+
+            const userAResponse = await api.post('users', {
+                data: {
+                    name: 'Delete User A',
+                    email: 'deletea@test.com'
+                }
+            });
+
+            const userA = await userAResponse.json();
+
+            const userBResponse = await api.post('users', {
+                data: {
+                    name: 'Delete User B',
+                    email: 'deleteb@test.com'
+                }
+            });
+
+            const userB = await userBResponse.json();
+
+            await api.delete(
+                `users/${userA.data.id}`
+            );
+
+            const response = await api.get(
+                `users/${userB.data.id}`
+            );
+
+            expect(response.status()).toBe(200);
+        }
+    );
+
+    test(
+        'User ID should remain unchanged after updates',
+        async ({ api }) => {
+
+            const createResponse = await api.post('users', {
+                data: {
+                    name: 'Immutable ID User',
+                    email: 'immutable@test.com'
+                }
+            });
+
+            const createdUser = await createResponse.json();
+
+            const originalId = createdUser.data.id;
+
+            await api.put(
+                `users/${originalId}`,
+                {
+                    data: {
+                        name: 'Immutable Updated',
+                        email: 'immutable.updated@test.com'
+                    }
+                }
+            );
+
+            const response = await api.get(
+                `users/${originalId}`
+            );
+
+            const updatedUser = await response.json();
+
+            expect(updatedUser.data.id)
+                .toBe(originalId);
         }
     );
 

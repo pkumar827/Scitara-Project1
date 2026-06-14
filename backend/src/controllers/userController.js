@@ -1,4 +1,5 @@
 const userService = require("../services/userService");
+
 const {
     createUserSchema,
     updateUserSchema
@@ -6,41 +7,67 @@ const {
 
 const AppError = require("../utils/AppError");
 
+const {
+    broadcast
+} = require("../../../advanced/websocket/websocketServer");
+
 async function getAllUsers(req, res, next) {
     try {
+
         const users = await userService.getAllUsers();
 
         res.status(200).json({
             success: true,
             data: users
         });
+
     } catch (error) {
+
         next(error);
     }
 }
 
 async function getUserById(req, res, next) {
     try {
-        const user = await userService.getUserById(req.params.id);
+
+        const user = await userService.getUserById(
+            req.params.id
+        );
 
         res.status(200).json({
             success: true,
             data: user
         });
+
     } catch (error) {
+
         next(error);
     }
 }
 
 async function createUser(req, res, next) {
     try {
-        const { error } = createUserSchema.validate(req.body);
+
+        const { error } = createUserSchema.validate(
+            req.body
+        );
 
         if (error) {
-            throw new AppError(error.details[0].message, 400);
+
+            throw new AppError(
+                error.details[0].message,
+                400
+            );
         }
 
-        const user = await userService.createUser(req.body);
+        const user = await userService.createUser(
+            req.body
+        );
+
+        broadcast({
+            event: "USER_CREATED",
+            user
+        });
 
         res.status(201).json({
             success: true,
@@ -49,16 +76,24 @@ async function createUser(req, res, next) {
         });
 
     } catch (error) {
+
         next(error);
     }
 }
 
 async function updateUser(req, res, next) {
     try {
-        const { error } = updateUserSchema.validate(req.body);
+
+        const { error } = updateUserSchema.validate(
+            req.body
+        );
 
         if (error) {
-            throw new AppError(error.details[0].message, 400);
+
+            throw new AppError(
+                error.details[0].message,
+                400
+            );
         }
 
         const user = await userService.updateUser(
@@ -73,12 +108,14 @@ async function updateUser(req, res, next) {
         });
 
     } catch (error) {
+
         next(error);
     }
 }
 
 async function deleteUser(req, res, next) {
     try {
+
         const result = await userService.deleteUser(
             req.params.id
         );
@@ -89,6 +126,7 @@ async function deleteUser(req, res, next) {
         });
 
     } catch (error) {
+
         next(error);
     }
 }

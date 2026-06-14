@@ -1,42 +1,62 @@
 [
-    {
-        "name": "Piyush Kumar",
-        "email": "piyush001@test.com"
-    },
-    {
-        "name": "Rahul Sharma",
-        "email": "rahul002@test.com"
-    },
-    {
-        "name": "Priya Verma",
-        "email": "priya003@test.com"
-    },
-    {
-        "name": "Amit Singh",
-        "email": "amit004@test.com"
-    },
-    {
-        "name": "Neha Gupta",
-        "email": "neha005@test.com"
-    },
-    {
-        "name": "Rohit Jain",
-        "email": "rohit006@test.com"
-    },
-    {
-        "name": "Sneha Kapoor",
-        "email": "sneha007@test.com"
-    },
-    {
-        "name": "Vikas Mehta",
-        "email": "vikas008@test.com"
-    },
-    {
-        "name": "Anjali Nair",
-        "email": "anjali009@test.com"
-    },
-    {
-        "name": "Karan Malhotra",
-        "email": "karan010@test.com"
-    }
+  {
+    "name": "Piyush Kumar",
+    "email": "piyush001@test.com"
+  },
+  {
+    "name": "Rahul Sharma",
+    "email": "rahul002@test.com"
+  },
+  {
+    "name": "Priya Verma",
+    "email": "priya003@test.com"
+  },
+  {
+    "name": "Amit Singh",
+    "email": "amit004@test.com"
+  },
+  {
+    "name": "Neha Gupta",
+    "email": "neha005@test.com"
+  },
+  {
+    "name": "Rohit Jain",
+    "email": "rohit006@test.com"
+  },
+  {
+    "name": "Sneha Kapoor",
+    "email": "sneha007@test.com"
+  },
+  {
+    "name": "Vikas Mehta",
+    "email": "vikas008@test.com"
+  },
+  {
+    "name": "Anjali Nair",
+    "email": "anjali009@test.com"
+  },
+  {
+    "name": "Karan Malhotra",
+    "email": "karan010@test.com"
+  },
+  {
+    "name": "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "email": "longname@test.com"
+  },
+  {
+    "name": "John Doe Junior",
+    "email": "space.name@test.com"
+  },
+  {
+    "name": "O'Connor",
+    "email": "apostrophe@test.com"
+  },
+  {
+    "name": "Mixed Case User",
+    "email": "Mixed.Case@Test.COM"
+  },
+  {
+    "name": "Numeric User 123",
+    "email": "numeric123@test.com"
+  }
 ]

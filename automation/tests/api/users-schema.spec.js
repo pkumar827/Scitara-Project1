@@ -33,13 +33,6 @@ test.describe('User Management API - Schema Validation', () => {
         'GET /api/users - should validate response schema for retrieving all users',
         async ({ api }) => {
 
-            await api.post('users', {
-                data: {
-                    name: 'List Schema User',
-                    email: 'list.schema@test.com'
-                }
-            });
-
             const response = await api.get('users');
 
             expect(response.status()).toBe(200);
@@ -66,13 +59,13 @@ test.describe('User Management API - Schema Validation', () => {
     );
 
     test(
-        'GET /api/users/{id} - should validate response schema for retrieving a user',
+        'GET /api/users/{id} - should validate response schema for retrieving a single user',
         async ({ api }) => {
 
             const createResponse = await api.post('users', {
                 data: {
-                    name: 'Get Schema User',
-                    email: 'get.schema@test.com'
+                    name: 'Schema GET User',
+                    email: 'schema.get@test.com'
                 }
             });
 
@@ -106,8 +99,8 @@ test.describe('User Management API - Schema Validation', () => {
 
             const createResponse = await api.post('users', {
                 data: {
-                    name: 'Update Schema User',
-                    email: 'update.schema@test.com'
+                    name: 'Schema PUT User',
+                    email: 'schema.put@test.com'
                 }
             });
 
@@ -117,8 +110,8 @@ test.describe('User Management API - Schema Validation', () => {
                 `users/${createdUser.data.id}`,
                 {
                     data: {
-                        name: 'Updated Schema User',
-                        email: 'updated.schema@test.com'
+                        name: 'Schema PUT Updated',
+                        email: 'schema.updated@test.com'
                     }
                 }
             );
@@ -134,10 +127,10 @@ test.describe('User Management API - Schema Validation', () => {
                 .toBeTruthy();
 
             expect(responseBody.data.name)
-                .toBe('Updated Schema User');
+                .toBe('Schema PUT Updated');
 
             expect(responseBody.data.email)
-                .toBe('updated.schema@test.com');
+                .toBe('schema.updated@test.com');
         }
     );
 
