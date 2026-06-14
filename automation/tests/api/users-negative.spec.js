@@ -215,4 +215,108 @@ test.describe('User Management API - Negative Scenarios', () => {
         }
     );
 
+        test(
+        'Scenario 11 - Verify that user registration is rejected when the name contains only whitespace characters',
+        async ({ api }) => {
+
+            const response = await api.post('users', {
+                data: {
+                    name: '     ',
+                    email: 'whitespace@test.com'
+                }
+            });
+
+            expect(response.status()).toBe(400);
+
+            const responseBody = await response.json();
+
+            expect(responseBody.success)
+                .toBeFalsy();
+        }
+    );
+
+    test(
+        'Scenario 12 - Verify that user registration is rejected when the name value is null',
+        async ({ api }) => {
+
+            const response = await api.post('users', {
+                data: {
+                    name: null,
+                    email: 'null.name@test.com'
+                }
+            });
+
+            expect(response.status()).toBe(400);
+
+            const responseBody = await response.json();
+
+            expect(responseBody.success)
+                .toBeFalsy();
+        }
+    );
+
+    test(
+        'Scenario 13 - Verify that user registration is rejected when the email value is null',
+        async ({ api }) => {
+
+            const response = await api.post('users', {
+                data: {
+                    name: 'Null Email User',
+                    email: null
+                }
+            });
+
+            expect(response.status()).toBe(400);
+
+            const responseBody = await response.json();
+
+            expect(responseBody.success)
+                .toBeFalsy();
+        }
+    );
+
+    test(
+        'Scenario 14 - Verify that updating a user is rejected when the name contains only whitespace characters',
+        async ({ api }) => {
+
+            const response = await api.put(
+                'users/non-existing-user',
+                {
+                    data: {
+                        name: '     '
+                    }
+                }
+            );
+
+            expect(response.status()).toBe(400);
+
+            const responseBody = await response.json();
+
+            expect(responseBody.success)
+                .toBeFalsy();
+        }
+    );
+
+    test(
+        'Scenario 15 - Verify that updating a user is rejected when the email value is null',
+        async ({ api }) => {
+
+            const response = await api.put(
+                'users/non-existing-user',
+                {
+                    data: {
+                        email: null
+                    }
+                }
+            );
+
+            expect(response.status()).toBe(400);
+
+            const responseBody = await response.json();
+
+            expect(responseBody.success)
+                .toBeFalsy();
+        }
+    );
+
 });

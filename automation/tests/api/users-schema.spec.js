@@ -134,4 +134,55 @@ test.describe('User Management API - Schema Validation', () => {
         }
     );
 
+    test(
+    'Scenario 05 - Verify that the delete user response adheres to the expected response contract',
+    async ({ api }) => {
+
+        const createResponse = await api.post('users', {
+            data: {
+                name: 'Delete Schema User',
+                email: 'delete.schema@test.com'
+            }
+        });
+
+        expect(createResponse.status()).toBe(201);
+
+        const createdUser = await createResponse.json();
+
+        const deleteResponse = await api.delete(
+            `users/${createdUser.data.id}`
+        );
+
+        expect(deleteResponse.status()).toBe(200);
+
+        const responseBody = await deleteResponse.json();
+
+        expect(responseBody.success)
+            .toBeTruthy();
+
+        expect(responseBody.message)
+            .toBe('User deleted successfully');
+    }
+);
+
+test(
+    'Scenario 06 - Verify that error responses conform to the expected contract structure',
+    async ({ api }) => {
+
+        const response = await api.get(
+            'users/non-existing-user'
+        );
+
+        expect(response.status()).toBe(404);
+
+        const responseBody = await response.json();
+
+        expect(responseBody.success)
+            .toBeFalsy();
+
+        expect(typeof responseBody.message)
+            .toBe('string');
+    }
+);
+
 });

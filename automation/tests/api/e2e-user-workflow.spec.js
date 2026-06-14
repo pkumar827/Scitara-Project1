@@ -367,4 +367,116 @@ test.describe('User Management API - End-to-End Workflow', () => {
         }
     );
 
+        test(
+        'Scenario 13 - Verify that a newly registered user is visible in the overall user listing',
+        async ({ api }) => {
+
+            const createResponse = await api.post('users', {
+                data: {
+                    name: 'Visibility User',
+                    email: 'visibility@test.com'
+                }
+            });
+
+            expect(createResponse.status()).toBe(201);
+
+            const createdUser = await createResponse.json();
+
+            const getAllResponse = await api.get('users');
+
+            expect(getAllResponse.status()).toBe(200);
+
+            const users = (await getAllResponse.json()).data;
+
+            const foundUser = users.find(
+                user => user.id === createdUser.data.id
+            );
+
+            expect(foundUser).toBeTruthy();
+
+            expect(foundUser.name)
+                .toBe('Visibility User');
+
+            expect(foundUser.email)
+                .toBe('visibility@test.com');
+        }
+    );
+
+    test(
+        'Scenario 14 - Verify that sequential user operations maintain data consistency across multiple users',
+        async ({ api }) => {
+
+            const userAResponse = await api.post('users', {
+                data: {
+                    name: 'Sequential User A',
+                    email: 'sequentialA@test.com'
+                }
+            });
+
+            const userA = await userAResponse.json();
+
+            const userBResponse = await api.post('users', {
+                data: {
+                    name: 'Sequential User B',
+                    email: 'sequentialB@test.com'
+                }
+            });
+
+            const userB = await userBResponse.json();
+
+            await api.delete(
+                `users/${userA.data.id}`
+            );
+
+            const remainingUserResponse = await api.get(
+                `users/${userB.data.id}`
+            );
+
+            expect(remainingUserResponse.status())
+                .toBe(200);
+
+            const remainingUser =
+                await remainingUserResponse.json();
+
+            expect(remainingUser.data.name)
+                .toBe('Sequential User B');
+        }
+    );
+
+    test(
+        'Scenario 15 - Verify that the overall user count decreases after a user is removed from the system',
+        async ({ api }) => {
+
+            const createResponse = await api.post('users', {
+                data: {
+                    name: 'Count Deletion User',
+                    email: 'count.deletion@test.com'
+                }
+            });
+
+            const createdUser = await createResponse.json();
+
+            const beforeDeleteResponse =
+                await api.get('users');
+
+            const beforeDeleteCount =
+                (await beforeDeleteResponse.json())
+                    .data.length;
+
+            await api.delete(
+                `users/${createdUser.data.id}`
+            );
+
+            const afterDeleteResponse =
+                await api.get('users');
+
+            const afterDeleteCount =
+                (await afterDeleteResponse.json())
+                    .data.length;
+
+            expect(afterDeleteCount)
+                .toBe(beforeDeleteCount - 1);
+        }
+    );
+
 });

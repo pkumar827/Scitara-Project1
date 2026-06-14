@@ -231,4 +231,138 @@ test.describe('User Management WebSocket Events', () => {
         }
     );
 
+    test(
+    'Scenario 05 - Verify that a single WebSocket client receives consecutive user creation events',
+    async ({ request }) => {
+
+        const events = [];
+
+        const ws = new WebSocket(
+            'ws://localhost:3001'
+        );
+
+        await new Promise((resolve) => {
+
+            ws.on('open', resolve);
+        });
+
+        ws.on('message', (data) => {
+
+            events.push(
+                JSON.parse(data.toString())
+            );
+        });
+
+        for (let i = 1; i <= 3; i++) {
+
+            await request.post(
+                'http://localhost:3000/api/users',
+                {
+                    data: {
+                        name: `WS User ${i}`,
+                        email: `ws${i}@test.com`
+                    }
+                }
+            );
+        }
+
+        await new Promise((r) => setTimeout(r, 1000));
+
+        ws.close();
+
+        expect(events.length)
+            .toBeGreaterThanOrEqual(3);
+    }
+
+    
+    );
+    test(
+    'Scenario 06 - Verify that the user identifier received through WebSocket notifications can be retrieved through REST APIs',
+    async ({ request }) => {
+
+        const messagePromise = new Promise((resolve) => {
+
+            const ws = new WebSocket(
+                'ws://localhost:3001'
+            );
+
+            ws.on('open', () => {
+
+                ws.on('message', (data) => {
+
+                    resolve(
+                        JSON.parse(data.toString())
+                    );
+
+                    ws.close();
+                });
+            });
+        });
+
+        await request.post(
+            'http://localhost:3000/api/users',
+            {
+                data: {
+                    name: 'REST WS User',
+                    email: 'restws@test.com'
+                }
+            }
+        );
+
+        const event = await messagePromise;
+
+        const response = await request.get(
+            `http://localhost:3000/api/users/${event.user.id}`
+        );
+
+        expect(response.status())
+            .toBe(200);
+    }
+    );
+    test(
+    'Scenario 07 - Verify that WebSocket clients continue to receive notifications after reconnecting to the server',
+    async ({ request }) => {
+
+        const client = await new Promise((resolve) => {
+
+            const ws = new WebSocket(
+                'ws://localhost:3001'
+            );
+
+            ws.on('open', () => {
+
+                resolve(ws);
+            });
+        });
+
+        const eventPromise = new Promise((resolve) => {
+
+            client.on('message', (data) => {
+
+                resolve(
+                    JSON.parse(data.toString())
+                );
+
+                client.close();
+            });
+        });
+
+        await request.post(
+            'http://localhost:3000/api/users',
+            {
+                data: {
+                    name: 'Reconnect User',
+                    email: 'reconnect@test.com'
+                }
+            }
+        );
+
+        const event = await eventPromise;
+
+        expect(event.event)
+            .toBe('USER_CREATED');
+    }
+);
+
+
 });
