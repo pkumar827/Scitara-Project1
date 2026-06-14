@@ -15,14 +15,10 @@ module.exports = defineConfig({
         ['html']
     ],
 
-    use: {
-        baseURL: 'http://localhost:3000/api'
-    },
-
     webServer: {
-        command: 'npm start',
+        command: 'node src/server.js',
         cwd: '../backend',
-        port: 3000,
+        url: 'http://localhost:3000/api/users',
         reuseExistingServer: true,
         timeout: 120000
     }
