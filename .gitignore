@@ -1,3 +1,5 @@
 node_modules/
 playwright-report/
 test-results/
+# Dynamic test data generated during execution
+backend/data/users.json
